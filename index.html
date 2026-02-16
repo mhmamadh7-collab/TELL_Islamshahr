@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>دفترچه تلفن داخلی</title>
+<style>
+  :root{--blue1:#007bff;--blue2:#0056b3;--muted:#666;}
+  html,body{height:100%}
+  body {
+    font-family: "Vazir FD", "Segoe UI", Tahoma, Arial, sans-serif;
+    margin:0; padding:12px 12px 120px 12px;
+    background: linear-gradient(to bottom,#f6f8fb,#e9eef6);
+    direction: rtl; color:#222;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+  .header {
+    position:fixed; top:0; left:0; width:100%;
+    background: linear-gradient(90deg,var(--blue1),var(--blue2));
+    color:#fff; text-align:center; padding:14px 10px;
+    font-size:20px; font-weight:800;
+    box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    z-index:1200; border-bottom-left-radius:14px;border-bottom-right-radius:14px;
+  }
+  .footer {
+    position:fixed; bottom:0; left:0; width:100%;
+    background: linear-gradient(90deg,var(--blue1),var(--blue2));
+    color:#fff; text-align:center; padding:12px 10px;
+    font-size:18px; font-weight:600;
+    box-shadow:0 -6px 18px rgba(0,0,0,0.12);
+    border-top-left-radius:14px;border-top-right-radius:14px;
+  }
+  main { max-width:1100px; margin:90px auto 80px auto; padding:0 12px; }
+  h1,h2 { text-align:center; color:#111; margin:6px 0 18px 0; font-weight:800; }
+  .subtitle { text-align:center; color:var(--muted); margin-bottom:14px; }
+  .main-list { display:flex; flex-direction:column; align-items:center; gap:14px; padding:0; margin:8px 0 18px 0; }
+  .main-list li {
+    list-style:none; color:#fff; padding:14px 20px; border-radius:12px; cursor:pointer;
+    width:92%; max-width:420px; text-align:center; transition:transform .18s, box-shadow .18s;
+    font-weight:800; font-size:16px; background: linear-gradient(90deg,var(--blue1),var(--blue2));
+    box-shadow:0 6px 14px rgba(0,0,0,0.12);
+  }
+  .main-list li:nth-child(2){ background: linear-gradient(90deg,#fd7e14,#e65c00); }
+  .main-list li:nth-child(3){ background: linear-gradient(90deg,#28a745,#1c7430); }
+  .main-list li:nth-child(4){ background: linear-gradient(90deg,#6c757d,#495057); }
+  .main-list li:nth-child(5){ background: linear-gradient(90deg,#17a2b8,#117a8b); }
+  .main-list li:hover{ transform:translateY(-6px); box-shadow:0 14px 36px rgba(0,0,0,0.14); }
+  .search-box {
+    display:block; margin:12px auto; padding:12px 14px; width:92%; max-width:680px;
+    border-radius:10px; border:1px solid #dcdcdc; font-size:15px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .cards-container {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px; margin-top:12px;
+  }
+  .card {
+    background:#fff; padding:14px; border-radius:12px; text-align:right;
+    box-shadow:0 8px 20px rgba(13,38,76,0.06); cursor:pointer; transition:transform .16s, box-shadow .16s;
+    min-height:68px; display:flex; flex-direction:column; justify-content:center;
+    font-weight:700; position:relative;
+  }
+  .card:hover { transform:translateY(-6px); box-shadow:0 18px 40px rgba(13,38,76,0.12); }
+  .card .meta { font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .badge { position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.06); padding:4px 8px; border-radius:10px; font-size:12px; }
+  .breadcrumb {
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;
+    color:var(--muted); font-size:13px;
+  }
+  .crumb { background:rgba(0,0,0,0.03); padding:6px 10px; border-radius:10px; font-weight:700; }
+  .back-button {
+    display:inline-block; margin:18px 0 6px 0; padding:10px 16px; background:linear-gradient(90deg,var(--blue1),var(--blue2));
+    color:#fff; border-radius:10px; text-decoration:none; font-weight:800; cursor:pointer;
+  }
+  /* صفحهٔ جزئیات (گرفتار در آخرین سطح) */
+  .detail-page { background:#fff; padding:22px; border-radius:12px; box-shadow:0 18px 40px rgba(13,38,76,0.06); text-align:center; }
+  .detail-title { font-size:22px; font-weight:900; margin-bottom:10px; }
+  .detail-ext { font-size:18px; color:var(--muted); margin-bottom:12px; }
+  .detail-note { font-size:14px; color:#333; line-height:1.5; }
+  /* سلسله مراتب فشرده برای نمایش داخل صفحهٔ بخش (نمایش مسیر فعلی) */
+  .hier-path { text-align:right; margin-bottom:8px; color:var(--muted); font-size:13px; }
+  mark { background:#ffeb3b; color:#000; padding:0 4px; border-radius:3px; }
+  @media (max-width:700px){
+    .cards-container { grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+    .header { font-size:18px; }
+  }
+  /* ---------- Chrome warning و Welcome modal (اضافه شده) ---------- */
+  .chrome-warning {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    background: linear-gradient(90deg,#ffc107,#ff8f00);
+    color: #111;
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 1400;
+    display: none;
+    direction: rtl;
+    align-items:center;
+    justify-content:space-between;
+    font-weight:700;
+  }
+  .chrome-warning .cw-text { display:flex; align-items:center; gap:8px; }
+  .chrome-warning .cw-actions { display:flex; gap:8px; align-items:center; }
+  .chrome-warning a.cw-link {
+    background:#007bff; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:800;
+  }
+  .chrome-warning button.cw-dismiss {
+    background:transparent; border:1px solid rgba(0,0,0,0.08); padding:8px 10px; border-radius:8px; cursor:pointer;
+  }
+  .welcome-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.48);
+    display: none; z-index:1500; align-items:center; justify-content:center;
+  }
+  .welcome-modal {
+    background: #fff; direction: rtl; color:#111; padding:18px; border-radius:12px;
+    max-width:520px; width:92%; box-shadow:0 20px 60px rgba(0,0,0,0.28); text-align:right;
+  }
+  .welcome-modal h3 { margin:0 0 8px 0; font-size:20px; font-weight:900; }
+  .welcome-modal p { color: #333; margin:0 0 14px 0; line-height:1.5; }
+  .welcome-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; flex-wrap:wrap; }
+  .welcome-actions button { padding:10px 14px; border-radius:8px; border:0; cursor:pointer; font-weight:800; }
+  .btn-primary { background: linear-gradient(90deg,#007bff,#0056b3); color:#fff; }
+  .btn-muted { background:#f1f3f5; color:#111; border:1px solid #e0e0e0; }
+</style>
+</head>
+<body>
+  <div class="header">دفترچه تلفن </div>
+  <!-- بنر پیشنهاد استفاده از کروم -->
+  <div id="chromeWarning" class="chrome-warning" role="status" aria-live="polite">
+    <div class="cw-text">برای نمایش بهتر این پرونده پیشنهاد می‌شود از مرورگر <strong>گوگل کروم</strong> استفاده کنید.</div>
+    <div class="cw-actions">
+      <a class="cw-link" href="https://www.google.com/chrome/" target="_blank" rel="noopener">دانلود/باز کردن کروم</a>
+      <button class="cw-dismiss" id="cwDismissBtn" aria-label="بستن اعلان">ادامه با این مرورگر</button>
+    </div>
+  </div>
+  <!-- مودال خوش‌آمدگویی -->
+  <div id="welcomeOverlay" class="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <div class="welcome-modal" role="document">
+      <h3 id="welcomeTitle">خوش آمدید</h3>
+      <p id="welcomeMessage">سلام خوش آمدید   از جستجو برای یافتن سریع داخلی‌ها استفاده کنید. موفق باشید.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+        <label style="font-size:13px;color:#666;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" id="dontShowAgain" /> <span>دوباره نمایش نده</span>
+        </label>
+        <div class="welcome-actions">
+          <button class="btn-muted" id="welcomeClose">شروع</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <main>
+    <div id="viewMain">
+      <h1>دفترچه تلفن داخلی</h1>
+      <p class="subtitle">دادگستری و دادسرای عمومی و انقلاب شهرستان اسلامشهر  </p>
+      <input id="globalSearch" class="search-box" type="search" placeholder="جستجو در کل (نام یا شماره داخلی)...">
+      <ul id="sectionsList" class="main-list" role="list">
+        <li data-section="دادگستری" tabindex="0">دادگستری</li>
+        <li data-section="دادسرا" tabindex="0">دادسرا</li>
+        <li data-section="امور اداری و مالی" tabindex="0">امور اداری و مالی</li>
+        <li data-section="سایر" tabindex="0">سایر</li>
+        <li data-section="مورد نیاز" tabindex="0">مورد نیاز</li>
+      </ul>
+      <div id="globalResults" class="cards-container" style="display:none; margin-top:12px;"></div>
+    </div>
+    <div id="viewSection" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <div>
+         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+  <div>
+    <!-- تغییر از goHome() به goUp() و متن به "بازگشت به صفحه قبل" -->
+    <a id="toRoot" class="back-button" href="#" onclick="goUp();return false;">بازگشت به صفحه قبل</a>
+  </div>
+  <div style="text-align:left;">
+    <div id="currentLevelInfo" style="font-size:13px;color:var(--muted);margin-bottom:6px;text-align:left;"></div>
+  </div>
+</div>
+        </div>
+        <div style="text-align:left;">
+          <div id="currentLevelInfo" style="font-size:13px;color:var(--muted);margin-bottom:6px;text-align:left;"></div>
+        </div>
+      </div>
+      <div class="hier-path" id="hierPath"></div>
+      <h2 id="sectionTitle"></h2>
+      <input id="levelSearch" class="search-box" type="search" placeholder="جستجو در این سطح...">
+      <div id="cardsGrid" class="cards-container" style="margin-top:12px;"></div>
+    </div>
+    <div id="viewDetail" style="display:none;">
+      <a id="backFromDetail" class="back-button" href="#" onclick="goUp();return false;">بازگشت</a>
+      <div class="detail-page" id="detailBox" style="margin-top:16px;">
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-ext" id="detailExt"></div>
+        <div class="detail-note" id="detailNote"></div>
+      </div>
+    </div>
+  </main>
+  <div class="footer">© حق نشر — محمد حیدری آذر 1404
+  </div>
+<script>
+/* -------- دادهٔ جاسازی‌شده (Akharin.json) --------
+   (محتوای JSON اصلاح‌شده)
+*/
+const data = {
+  "دادگستری": [
+    {
+      "name": "ریاست دادگستری",
+      "sub": [
+        {
+          "name": "رییس دادگستری ",
+          "sub": [
+            {
+              "name": "حجت الاسلام و المسلمین آقای عباسی داخلی 210",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر ریاست",
+          "sub": [
+            {
+              "name": "آقای آذیس داخلی 210",
+              "sub": []
+            },
+            {
+              "name": "آقای مجنون داخلی 300",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "معاون قضایی دادگستری",
+      "sub": [
+        {
+          "name": "  آقای محمدی داخلی 200",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "مدیر دفتر کل ",
+      "sub": [
+        {
+          "name": "آقای محسنی نسب داخلی 255",
+          "sub": []
+        },
+        {
+          "name": "آقای حسین پور داخلی 260",
+          "sub": []
+        },
+        {
+          "name": "خانم نوربخش داخلی 256",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "شعبه اول حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای نامدار داخلی 201",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای خلیلی ، خانم شهبازی ، خانم عربی ، آقای لطفی نیا داخلی 301",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه دوم حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "حجت الاسلام و المسلمین علی پوررجبی داخلی 202",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "خانم لشگری ، خانم فلاحی ، آقای کیمیا  داخلی 302",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه سوم حقوقی ",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای یعقوبی زاده داخلی 203",
+              "sub": [
+                {
+                  "name": "قاضی شعبه  - زیرمجموعه 1 - زیرمجموعه 1",
+                  "sub": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای نباتی ، خانم ولوی و آذرگشب داخلی 303",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه چهارم حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای بهرامی داخلی 204",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "خانم نصیری و اسدنژاد و آقای بدرلو داخلی 304",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه پنجم حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه",
+          "sub": [
+            {
+              "name": "آقای نعمت زاده داخلی 205",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای گروسی وخالقی و خانم رضایی و عبدالهی  داخلی 305",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه ششم حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای شیری داخلی 206",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای فتحی ، خانم واقف  و جلیلی  داخلی 306",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه هشتم حقوقی ",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای بابالوئی داخلی 208",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای صفری و خاوندی وخانم عبدالهی داخلی 308",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه نهم حقوقی ",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای مهدوی داخلی 679",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای زواری فراهانی و خانم قدیمی داخلی 380",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه ده حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای میرزائی  داخلی450",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقایان محمدعلی ، علی نژاد و مرادی داخلی 265",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه یازده حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای حسین پور داخلی 661",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقایان صداقتی و علائی و خانم نظری داخلی 662",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه دوازده حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای مهدوی داخلی 612",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای نساجی خانم موسوی و هاشم زاده داخلی 312",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 101 کیفری",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای صمد زادگان داخلی 101",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "خانم ریحان صفت و آقایان داورپناه و الماسی داخلی 111",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 102 کیفری",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "حجت الاسلام آقای رمضانی نوده داخلی 102",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقایان قدیمی ، کلاهی ، حبیب نژاد داخلی 112",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 103 کیفری",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای ایاره داخلی 103",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "خانم پور محمدی و قاسم زاده و آقای امینی داخلی 113",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 104 کیفری",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "قاضی شعبه  ",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای بلوچی داخلی 114",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 105 کیفری",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای شایان داخلی 105",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "خانم پوریوسفی احمدی و آقای فضل اله نژاد داخلی 115",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اجرای احکام مدنی 1",
+      "sub": [
+        {
+          "name": "قاضی شعبه اجرا",
+          "sub": [
+            {
+              "name": "خانم محمد قلی ها داخلی 140",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام ",
+          "sub": [
+            {
+              "name": "مدیر دفتر اجرا",
+              "sub": [
+                {
+                  "name": "آقای سید علوی داخلی 340",
+                  "sub": []
+                }
+              ]
+            },
+            {
+              "name": "دادورز اجرای احکام ",
+              "sub": [
+                {
+                  "name": "خانمها سرمدی ، نصری ، علی بلندی   و آقایان عامری و رزندی داخلی 241",
+                  "sub": []
+                },
+                {
+                  "name": "آقایان  قره بقلو ، صفری  و حسام رحیمی داخلی 240",
+                  "sub": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اجرای احکام مدنی 2",
+      "sub": [
+        {
+          "name": "قاضی اجرا احکام",
+          "sub": [
+            {
+              "name": "خانم کاظمی داخلی 150",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام",
+          "sub": [
+            {
+              "name": "مدیر دفتر اجرا",
+              "sub": [
+                {
+                  "name": "آقای سید گل محمد داخلی 250",
+                  "sub": []
+                }
+              ]
+            },
+            {
+              "name": "دادورز اجرا احکام",
+              "sub": [
+                {
+                  "name": "آقای رضاخانی داخلی 166",
+                  "sub": []
+                },
+                {
+                  "name": "خانم ها  جعفری ، فلاح داخلی 251",
+                  "sub": []
+                },
+                {
+                  "name": "آقای یغمایی و خانم اسدی نژاد داخلی 252",
+                  "sub": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اجرای احکام مدنی 3",
+      "sub": [
+        {
+          "name": "قاضی اجرا",
+          "sub": []
+        },
+        {
+          "name": "دفتر اجرا",
+          "sub": [
+            {
+              "name": "مدیر دفتر  اجرا ",
+              "sub": [
+                {
+                  "name": "خانم فلاحی داخلی 672 ",
+                  "sub": []
+                }
+              ]
+            },
+            {
+              "name": "دادورز اجرای احکام",
+              "sub": [
+                {
+                  "name": "خانمها",
+                  "sub": []
+                },
+                {
+                  "name": " خانم",
+                  "sub": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اجرای احکام مدنی 4",
+      "sub": [
+        {
+          "name": "قاضی اجرا",
+          "sub": []
+        },
+        {
+          "name": "دفتر اجرا",
+          "sub": [
+            {
+              "name": "مدیر دفتر  اجرا ",
+              "sub": [
+                {
+                  "name": "خانم لطفی داخلی 687",
+                  "sub": []
+                }
+              ]
+            },
+            {
+              "name": "دادورز اجرای احکام",
+              "sub": [
+                {
+                  "name": "خانم حبیب الهی ، خانم نعیمی داخلی 688",
+                  "sub": []
+                },
+                {
+                  "name": "خانم مصطفی زاده داخلی 689",
+                  "sub": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "دادگاه انقلاب",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "آقای اسکندری داخلی 130",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای مشهدی و فلاحی و خانم رجبی  داخلی 230",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه 19 کیفری یک",
+      "sub": [
+        {
+          "name": "مستشار شعبه ",
+          "sub": [
+            {
+              "name": "آقایان شمس و جبله داخلی 219",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقای حاج اسفندیاری و خانم صادقی  ،بیگدلی داخلی 319",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ثبت کل و دبیرخانه دادگستری",
+      "sub": [
+        {
+          "name": "خانمها مرتضوی و فغانی داخلی 653",
+          "sub": []
+        },
+        {
+          "name": "خانمها اسمعیلی و محمد خانلو داخلی 370",
+          "sub": []
+        },
+        {
+          "name": "خانم خورشیدوند داخلی 360",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "مدیر سیستم و انفورماتیک",
+      "sub": [
+        {
+          "name": "آقایان کرامت و کیانی داخلی 680",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "شعبه سوم دادگاه صلح",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "قاضی شعبه  داخلی",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "آقایان نقی زاده ، قاسمی ،محرم پور داخلی 307",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+     "name": "شعبه هفتم دادگاه حقوقی",
+      "sub": [
+        {
+          "name": "قاضی شعبه ",
+          "sub": [
+            {
+              "name": "قاضی شعبه  داخلی ",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه ",
+          "sub": [
+            {
+              "name": "،  آقای رزاقی ، آقای محرم پور داخلی 170 ",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "آبدارخانه ",
+      "sub": [
+        {
+          "name": "آبدارخانه ریاست دادگستری ",
+          "sub": [
+            {
+              "name": "آقای قره محمد داخلی 190",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "آبدارخانه  طبقه همکف ",
+          "sub": [
+            {
+              "name": "آقای اسدی نژاد داخلی --",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "نظارت و پیگیری ",
+      "sub": [
+        {
+          "name": "حجت الاسلام و المسلمین آقای اسدی داخلی 256",
+          "sub": []
+        }
+      ]
+    }
+  ],
+  "دادسرا": [
+    {
+      "name": "دادستان عمومی و انقلاب ",
+      "sub": [
+        {
+          "name": "دادستان عمومی و انقلاب  ",
+          "sub": [
+            {
+              "name": "آقای دوستی نژاد داخلی 211",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر دادستان عمومی و انقلاب",
+          "sub": [
+            {
+              "name": "آقای دالوند داخلی 211",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "معاون دادستان",
+      "sub": [
+        {
+          "name": "معاون دادستان ",
+          "sub": [
+            {
+              "name": "آقای بیجوند داخلی 500",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر معاون دادستان",
+          "sub": [
+            {
+              "name": "آقای یوسف زاده داخلی 570",
+              "sub": []
+            },
+            {
+              "name": "خانم  رضایی و خانم فردوسی داخلی 675",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "مدیر دفتر کل ",
+      "sub": [
+        {
+          "name": "آقای دوستدار داخلی 216",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "شعبه اول بازپرسی",
+      "sub": [
+        {
+          "name": "بازپرس شعبه",
+          "sub": [
+            {
+              "name": "آقای بدرخانی داخلی 421",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانمها شعبانی و مالکی داخلی 521",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه دوم بازپرسی",
+      "sub": [
+        {
+          "name": "بارپرس شعبه",
+          "sub": [
+            {
+              "name": "آقای وکیلی یار داخلی 422",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقایان مسعودی و خسروی داخلی 522",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه چهارم بازپرسی",
+      "sub": [
+        {
+          "name": "بازپرس شعبه",
+          "sub": [
+            {
+              "name": "آقای خوجانی داخلی 424",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقای اسکندری و خانم دهقانی داخلی 524",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه ششم بازپرسی ",
+      "sub": [
+        {
+          "name": "بازپرس شعبه",
+          "sub": [
+            {
+              "name": "آقای علی پناه داخلی 426",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقای هادی پور و خانم رحمن پور داخلی 526",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه هفتم بازپرسی ",
+      "sub": [
+        {
+          "name": "بازپرس شعبه",
+          "sub": [
+            {
+              "name": "آقای گرگری داخلی 427",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقایان عظیم وند و خورشیدوند داخلی 524",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اول دادیاری ",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای التمیمی داخلی 401",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانمها نادری و پورمحمدی داخلی 501",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه دوم دادیاری ",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای شاه نظری داخلی 402",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقای لطفی و خانم طیبی داخلی 502",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه سوم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای پورمند داخلی 403",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقای کوشاری و خانم توکلی داخلی 503",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه چهارم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "دادیار شعبه داخلی 404",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم جوهری داخلی 504",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه پنجم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای اسلام دوست داخلی 405",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "اقای غلامی و خانم شریفی داخلی 505",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه ششم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای گائینی داخلی 406",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانمها خورشیدوند و اکبری داخلی 506",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه هفتم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای بهرامی داخلی 407",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم ها جوزی و آزاد بخت  داخلی 507",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه هشتم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای قفلی داخلی 408",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم ها اسماعیلی نسب و آقایی داخلی 508",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه نهم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای حسینی امین  داخلی 409",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "آقایان مهری و علیزاده داخلی 509",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه دهم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "دادیار شعبه  داخلی 410",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم ها مرتضوی و فرید داخلی 510",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه یازدهم دادیاری",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "آقای معتمدی داخلی 411",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم ها قنبری و شاهمیرزائی داخلی 511",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه نیابت",
+      "sub": [
+        {
+          "name": "دادیار نیابت ",
+          "sub": [
+            {
+              "name": "آقای گرجی داخلی 413",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر نیابت ",
+          "sub": [
+            {
+              "name": "خانم اکبری و آقای فرجی داخلی 513",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "اجرای احکام دادگاه انقلاب ",
+      "sub": [
+        {
+          "name": "شعبه اجرای احکام",
+          "sub": [
+            {
+              "name": "خانم بیات داخلی 423",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام",
+          "sub": [
+            {
+              "name": "آقایان اقبال و حسینی و ناصری و خانم جعفری داخلی 523",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "اجرای کیفری 1",
+      "sub": [
+        {
+          "name": "دادیار اجرای احکام",
+          "sub": [
+            {
+              "name": "خانم دادیار داخلی 420",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام",
+          "sub": [
+            {
+              "name": "آقای محبی و خان نصری و خانم شعبانی داخلی 420",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "اجرای کیفری 2",
+      "sub": [
+        {
+          "name": "دادیار اجرای احکام",
+          "sub": [
+            {
+              "name": "خانم بابائیان داخلی 199",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام",
+          "sub": [
+            {
+              "name": "آقایان سلمانی و منطقی و صلاحی و سودی داخلی 580",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "اجرای کیفری 3",
+      "sub": [
+        {
+          "name": "دادیار اجرای احکام",
+          "sub": [
+            {
+              "name": "آقای یعقوبی نادر داخلی 185",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر اجرای احکام",
+          "sub": [
+            {
+              "name": "آقایان مرهمی و استادی و حسنوند و خانم رضائی داخلی 520",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "دفتر کل اجرای احکام ",
+      "sub": [
+        {
+          "name": "آقای ابراهیم داخلی 555",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "شعبه سرپرستی",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "خانم نوری داخلی 296",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم ها ابراهیمی و سوری داخلی 196",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "شعبه اظهار نظر",
+      "sub": [
+        {
+          "name": "دادیار شعبه",
+          "sub": [
+            {
+              "name": "خانم روزخش داخلی 400",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دفتر شعبه",
+          "sub": [
+            {
+              "name": "خانم شاهمیرزایی داخلی 677",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ثبت کل و دبیرخانه ",
+      "sub": [
+        {
+          "name": "ثبت کل",
+          "sub": [
+            {
+              "name": "خانم ها عباسیان و مولوی داخلی 540",
+              "sub": []
+            },
+            {
+              "name": "آقای خسروی داخلی 197",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "دبیرخانه",
+          "sub": [
+            {
+              "name": "آقای خاکسار داخلی 678",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "مدیر سیستم و انفورماتیک",
+      "sub": [
+        {
+          "name": "خانم سلیمانی داخلی 175",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "شعبه دادستانی",
+      "sub": [
+        {
+          "name": "خانم امام دوست و خانم غلامی داخلی 193",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "دفتر پابند الکترونیک",
+      "sub": [
+        {
+          "name": "دفتر پابند الکترونیک داخلی 198",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "حفاظت اطلاعات",
+      "sub": [
+        {
+          "name": "آقای بیجوند داخلی 222",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "آبدارخانه دادسرا",
+      "sub": [
+        {
+          "name": "آقایان عبادی و ملکی  داخلی 290",
+          "sub": []
+        }
+      ]
+    }
+  ],
+  "امور اداری و مالی": [
+    {
+      "name": "ریاست امور اداری و مالی ",
+      "sub": [
+        {
+          "name": "آقای سوری داخلی 260",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "مسئول امور مالی",
+      "sub": [
+        {
+          "name": "آقای حیدری داخلی 350",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "امور مالی ",
+      "sub": [
+        {
+          "name": "آقایان حسین پور ، میرزایی داخلی 390",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "کارگزینی",
+      "sub": [
+        {
+          "name": "آقای رفیعی داخلی 330",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "امین اموال",
+      "sub": [
+        {
+          "name": "آقای رزاقی داخلی 390",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "انبار ",
+      "sub": [
+        {
+          "name": "آقای حسین رجبی داخلی 160",
+          "sub": []
+        }
+      ]
+    }
+  ],
+"سایر": [
+    {
+      "name": "روابط عمومی",
+      "sub": [
+        {
+          "name": "آقای رحیمی داخلی 118",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "تاسیسات ",
+      "sub": [
+        {
+          "name": "آقایان ریحانی ، حسنی داخلی 155",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "ارشاد و معاضدت قضایی",
+      "sub": [
+        {
+          "name": "آقای قلی زاده داخلی 455",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "بایگانی راکد و الکترونیک",
+      "sub": [
+        {
+          "name": "بایگانی راکد",
+          "sub": [
+            {
+              "name": "آقای قهرمانی داخلی 145",
+              "sub": []
+            }
+          ]
+        },
+        {
+          "name": "بایگانی الکترونیک",
+          "sub": [
+            {
+              "name": "آقای فراهانی و آقای بیابانی",
+              "sub": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "اطلاعات و پاسخگویی ارباب رجوع",
+      "sub": [
+        {
+          "name": "آقای رحیمی داخلی 195",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "یگان حفاظت و بازرسی",
+      "sub": [
+        {
+          "name": "یگان حفاظت داخلی 333",
+          "sub": []
+        },
+        {
+          "name": "بازرس درب ورودی   داخلی 110",
+          "sub": []
+        },
+        {
+          "name": "بازرسی درب پارکینگ داخلی 120",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "مدیر ساختمان و خدمات",
+      "sub": [
+        {
+          "name": "آقای سلامت داخلی 430",
+          "sub": []
+        }
+      ]
+    }
+  ],
+  "مورد نیاز": [
+    {
+      "name": "اداره رفاه دادگستری کل استان تهران",
+      "sub": [
+        {
+          "name": "صندوق وام  تماس 39912728 و 39912725",
+          "sub": []
+        },
+        {
+          "name": "امور رفاهی تماس 39912721",
+          "sub": []
+        }
+      ]
+    },
+    {
+      "name": "امور اداری دادگستری استان تهران",
+      "sub": [
+        {
+          "name": "کسر از حقوق تماس 39912630و1",
+          "sub": []
+        }
+      ]
+    }
+  ]
+};
+/* ---------- ابزارهای نمایش و جستجو ---------- */
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"'`=\/]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'}[c];});
+}
+function escapeRegExp(s){ return String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function highlight(s,q){
+  if(!q) return escapeHtml(s);
+  try{
+    var re = new RegExp(escapeRegExp(q),'gi');
+    return escapeHtml(s).replace(re,function(m){ return '<mark>'+m+'</mark>'; });
+  }catch(e){ return escapeHtml(s); }
+}
+/* ---------- حالت و مسیر فعلی ---------- */
+let stack = []; // هر عنصر: {items: array, index: number (selected index), title: string}
+let currentItems = null; // آرایه‌ای از آیتم‌های فعلی
+let currentTitle = '';    // عنوان فعلی (مثلاً "ریاست دادگستری")
+let parentPath = [];      // آرایه‌ای از اسامی مسیر برای breadcrumb
+/* --- المان‌ها --- */
+const viewMain = document.getElementById('viewMain');
+const viewSection = document.getElementById('viewSection');
+const viewDetail = document.getElementById('viewDetail');
+const sectionsList = document.getElementById('sectionsList');
+const cardsGrid = document.getElementById('cardsGrid');
+const sectionTitle = document.getElementById('sectionTitle');
+const hierPath = document.getElementById('hierPath');
+const levelSearch = document.getElementById('levelSearch');
+const globalSearch = document.getElementById('globalSearch');
+const globalResults = document.getElementById('globalResults');
+const currentLevelInfo = document.getElementById('currentLevelInfo');
+/* ---------- توابع رندر و ناوبری ---------- */
+function goHome(){
+  // پاک کردن مسیر
+  stack = [];
+  currentItems = null;
+  currentTitle = '';
+  parentPath = [];
+  viewMain.style.display = '';
+  viewSection.style.display = 'none';
+  viewDetail.style.display = 'none';
+  globalSearch.value = '';
+  globalResults.style.display = 'none';
+  levelSearch.value = '';
+  updateFocusForHome();
+}
+function enterSection(sectionKey){
+  // مقاوم‌سازی: حذف فضاهای اضافی از ورودی
+  const key = String(sectionKey || '').trim();
+  const items = (data[key] && Array.isArray(data[key])) ? data[key] : [];
+  stack = []; parentPath = [key];
+  pushLevel({ items: items, title: key });
+  showLevel();
+}
+function pushLevel(level){
+  stack.push(level);
+  currentItems = level.items;
+  currentTitle = level.title || '';
+}
+function popLevel(){
+  if(stack.length>1){
+    stack.pop();
+    const top = stack[stack.length-1];
+    currentItems = top.items;
+    currentTitle = top.title || '';
+    parentPath = stack.map(s=>s.title);
+    showLevel();
+    return true;
+  } else {
+    // اگر فقط یک سطح مانده باشد، بازگشت به صفحهٔ اصلی
+    goHome();
+    return false;
+  }
+}
+function goUp(){
+  // استفاده در دکمه بازگشت از صفحهٔ جزئیات
+  if(stack.length>0){
+    stack.pop();
+    if(stack.length===0){
+      goHome(); return;
+    }
+    const top = stack[stack.length-1];
+    currentItems = top.items;
+    currentTitle = top.title || '';
+    parentPath = stack.map(s=>s.title);
+    showLevel();
+  } else {
+    goHome();
+  }
+}
+function showLevel(){
+  // نمایش سطح فعلی به شکلی که کاربر بتواند روی آیتم‌ها کلیک کند
+  viewMain.style.display = 'none';
+  viewSection.style.display = '';
+  viewDetail.style.display = 'none';
+  sectionTitle.textContent = currentTitle;
+  parentPath = stack.map(s=>s.title);
+  renderHierPath();
+  renderCards(currentItems);
+  levelSearch.value = '';
+  updateCurrentLevelInfo();
+  window.scrollTo(0,0);
+}
+function renderHierPath(){
+  if(!parentPath || parentPath.length===0){
+    hierPath.textContent = '';
+    return;
+  }
+  hierPath.innerHTML = parentPath.map((p,i)=>'<span class="crumb">'+escapeHtml(p)+'</span>').join(' › ');
+}
+function updateCurrentLevelInfo(){
+  const depth = stack.length;
+  currentLevelInfo.textContent = 'عمق فعلی: ' + depth;
+}
+/* رندر کارت‌ها برای آرایهٔ داده */
+function renderCards(items){
+  cardsGrid.innerHTML = '';
+  if(!items || items.length===0){
+    const p = document.createElement('p');
+    p.style.width='100%'; p.style.textAlign='center'; p.style.color='#333';
+    p.textContent = 'آیتمی برای نمایش وجود ندارد.';
+    cardsGrid.appendChild(p);
+    return;
+  }
+  for(let i=0;i<items.length;i++){
+    const it = items[i];
+    const div = document.createElement('div');
+    div.className = 'card';
+    // رنگ مرز بالا بر اساس سطح نخست (برای زیبایی)
+    if(parentPath[0] === 'دادگستری') div.style.borderTop = '4px solid #007bff';
+    if(parentPath[0] === 'دادسرا') div.style.borderTop = '4px solid #fd7e14';
+    if(parentPath[0] === 'امور اداری و مالی') div.style.borderTop = '4px solid #28a745';
+    if(parentPath[0] === 'سایر') div.style.borderTop = '4px solid #6c757d';
+    if(parentPath[0] === 'مورد نیاز') div.style.borderTop = '4px solid #17a2b8';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const hasSub = Array.isArray(it.sub) && it.sub.length>0;
+    meta.textContent = hasSub ? '' : '';
+    div.appendChild(meta);
+    const title = document.createElement('div');
+    title.innerHTML = escapeHtml(it.name || '');
+    div.appendChild(title);
+    // دسترس‌پذیری: قابل کیبورد
+    div.setAttribute('tabindex','0');
+    div.setAttribute('role','button');
+    div.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); div.click(); } });
+    // onclick: اگر زیرمجموعه دارد وارد زیرمجموعه شو، در غیر این صورت وارد صفحهٔ جزئیات شو
+    div.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(hasSub){
+        // وارد سطح جدید شو
+        pushLevel({ items: it.sub, title: it.name || '...' });
+        showLevel();
+      } else {
+        // صفحهٔ جزئیات (آخرین سطح) — گزینه 2: عنوان بزرگ + اطلاعات
+        showDetail(it);
+      }
+    });
+    cardsGrid.appendChild(div);
+  }
+}
+/* صفحهٔ جزئیات: استخراج شمارهٔ داخلی (در صورت وجود) و نمایش */
+function persianToLatinDigits(str){
+  const map = { '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9' };
+  return String(str||'').replace(/[۰-۹]/g, d => map[d] || d);
+}
+function extractExtensions(text){
+  // قبول ارقام لاتین و فارسی و برخی جداکننده‌ها
+  const re = /داخلی\s*[:\-–—]?\s*([0-9\u06F0-\u06F9\-–—]+)/gi;
+  const matches = [];
+  let m;
+  while((m = re.exec(text || '')) !== null){
+    let num = m[1].replace(/[–—\u2013\u2014]/g,'-').trim();
+    num = persianToLatinDigits(num).replace(/[^\d\-]/g,''); // فقط ارقام و - بماند
+    if(num) matches.push(num);
+  }
+  return matches; // آرایهٔ اعداد (ممکن است خالی باشد)
+}
+function showDetail(node){
+  viewMain.style.display = 'none';
+  viewSection.style.display = 'none';
+  viewDetail.style.display = '';
+  // عنوان
+  const titleEl = document.getElementById('detailTitle');
+  const extEl = document.getElementById('detailExt');
+  const noteEl = document.getElementById('detailNote');
+  titleEl.textContent = node.name || '';
+  const exts = extractExtensions(String(node.name || ''));
+  if(exts && exts.length>0){
+    // نمایش لینک tel: برای هر شماره
+    extEl.innerHTML = 'داخلی: ' + exts.map(n => `<a href="tel:${n}">${n}</a>`).join(' — ');
+  } else {
+    extEl.textContent = '';
+  }
+  if(!extEl.textContent){
+    noteEl.innerHTML = 'این مورد زیرمجموعه ندارد و شمارهٔ داخلی در متن مشخص نیست.';
+  } else {
+    noteEl.innerHTML = ': ' + escapeHtml(node.name || '');
+  }
+  window.scrollTo(0,0);
+}
+/* ---------- جستجوی سطحی در آرایهٔ فعلی (levelSearch) ---------- */
+levelSearch.addEventListener('input', function(){
+  const q = (this.value||'').toLowerCase().trim();
+  if(!q){
+    renderCards(currentItems);
+    return;
+  }
+  // نمایش آیتم‌هایی که در نام خود q را دارند یا در زیرشاخه‌هایشان وجود دارد (یک سطح search shallow)
+  const filtered = [];
+  for(const it of (currentItems||[])){
+    if((it.name||'').toLowerCase().indexOf(q)!==-1){
+      filtered.push(it);
+      continue;
+    }
+    // اگر زیرمجموعه‌ها شامل q هستند، آن آیتم را هم بیاور
+    if(it.sub && Array.isArray(it.sub)){
+      if(searchInSub(it.sub,q)) filtered.push(it);
+    }
+  }
+  renderCards(filtered);
+});
+function searchInSub(arr,q){
+  for(const s of arr){
+    if((s.name||'').toLowerCase().indexOf(q)!==-1) return true;
+    if(s.sub && Array.isArray(s.sub) && searchInSub(s.sub,q)) return true;
+  }
+  return false;
+}
+/* ---------- جستجوی کلی (globalSearch) — نتایج بدون تکرار و breadcrumb ---------- */
+globalSearch.addEventListener('input', function(){
+  const qRaw = (this.value||'').trim();
+  const q = qRaw.toLowerCase();
+  if(!q){
+    globalResults.style.display = 'none';
+    return;
+  }
+  // جمع‌آوری نتایج: هر کارت/گره که خودش یا زیرشاخه‌اش match کند.
+  const results = [];
+  const keys = Object.keys(data);
+  for(const k of keys){
+    const arr = data[k]||[];
+    for(const it of arr){
+      collectMatches(it, k, q, results, []);
+    }
+  }
+  renderGlobalResults(results, qRaw);
+});
+function collectMatches(node, section, qLower, results, path){
+  // جلوگیری از تکرار براساس مرجع شیء
+  for(const r of results) if(r.node===node) return;
+  const nameLower = (node.name||'').toLowerCase();
+  if(nameLower.indexOf(qLower)!==-1){
+    results.push({ node: node, section: section, path: path.slice() });
+    return;
+  }
+  if(node.sub && Array.isArray(node.sub)){
+    for(const s of node.sub){
+      collectMatches(s, section, qLower, results, path.concat(node.name));
+    }
+  }
+}
+function renderGlobalResults(results, qRaw){
+  globalResults.innerHTML = '';
+  if(results.length===0){
+    globalResults.style.display = ''; // show
+    const p = document.createElement('p');
+    p.style.textAlign='center'; p.style.width='100%'; p.style.color='#333';
+    p.textContent = 'هیچ نتیجه‌ای یافت نشد.';
+    globalResults.appendChild(p);
+    return;
+  }
+  globalResults.style.display = '';
+  for(const r of results){
+    const card = document.createElement('div');
+    card.className = 'card';
+    const badge = document.createElement('div');
+    badge.className = 'badge';
+    badge.textContent = r.section;
+    card.appendChild(badge);
+    if(r.path && r.path.length>0){
+      const bc = document.createElement('div');
+      bc.style.fontSize='12px'; bc.style.color='var(--muted)'; bc.style.marginBottom='8px'; bc.style.textAlign='right';
+      bc.textContent = r.path.join(' › ') + ' › ';
+      card.appendChild(bc);
+    }
+    const nameDiv = document.createElement('div');
+    nameDiv.innerHTML = highlight(r.node.name || '', qRaw);
+    card.appendChild(nameDiv);
+    // دسترس‌پذیری
+    card.setAttribute('tabindex','0');
+    card.setAttribute('role','button');
+    card.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); card.click(); } });
+    card.addEventListener('click', function(){
+      // رفتار: وقتی نتیجه کلی زده شد، ما مسیر را بازسازی می‌کنیم: پیدا کردن پدرها تا ریشه و ورود به آن شاخه
+      navigateToNode(r.node);
+    });
+    globalResults.appendChild(card);
+  }
+}
+/* ---------- پیمایش برای بازسازی مسیر تا یک گره مشخص ---------- */
+/* روش ساده: یافتن مسیر با DFS در هر بخش */
+function findPathToNode(rootKey, targetNode){
+  const list = data[rootKey] || [];
+  const path = [];
+  function dfs(arr, parents){
+    for(const n of arr){
+      if(n === targetNode){
+        path.push(...parents, n);
+        return true;
+      }
+      if(n.sub && Array.isArray(n.sub)){
+        if(dfs(n.sub, parents.concat(n))) return true;
+      }
+    }
+    return false;
+  }
+  if(dfs(list, [])) return path;
+  return null;
+}
+function navigateToNode(targetNode){
+  const keys = Object.keys(data);
+  for(const k of keys){
+    const pathNodes = findPathToNode(k, targetNode);
+    if(pathNodes){
+      stack = [];
+      const sectionItems = data[k];
+      pushLevel({ items: sectionItems, title: k });
+      for(let i=0;i<pathNodes.length;i++){
+        const node = pathNodes[i];
+        if(i===0){
+          const found = currentItems.find(x=>x===node || x.name===node.name);
+          if(found && found.sub && found.sub.length>0){
+            pushLevel({ items: found.sub, title: found.name });
+          }
+        } else if(i < pathNodes.length-1){
+          const found = currentItems.find(x=>x===node || x.name===node.name);
+          if(found && found.sub && found.sub.length>0){
+            pushLevel({ items: found.sub, title: found.name });
+          } else {
+            pushLevel({ items: node.sub || [], title: node.name || '' });
+          }
+        } else {
+          const last = node;
+          if(last.sub && last.sub.length>0){
+            pushLevel({ items: last.sub, title: last.name });
+            showLevel();
+            return;
+          } else {
+            showDetail(last);
+            return;
+          }
+        }
+      }
+      showLevel();
+      return;
+    }
+  }
+  alert('مسیر یافت نشد.');
+}
+/* ---------- دسترسی با کیبورد برای لیست بخش‌ها ---------- */
+document.querySelectorAll('#sectionsList li[data-section]').forEach(function(li){
+  li.addEventListener('click', function(){ enterSection(this.getAttribute('data-section')); });
+  li.addEventListener('keydown', function(e){ if(e.key==='Enter') enterSection(this.getAttribute('data-section')); });
+});
+/* ---------- Chrome warning و Welcome modal behavior (اصلاح‌شده) ---------- */
+(function(){
+  // دیگر نام کاربر را نمایش نمی‌دهیم
+  // پیام ثابت خوش‌آمدگویی در HTML تنظیم شده است
+  function shouldShowChromeWarning(){
+    const ua = navigator.userAgent || '';
+    // آیا کروم واقعی است (غیرفعال کردن Edge/Opera/Brave و...)
+    const isChrome = /Chrome/.test(ua) && !(/Edg|OPR|Opera|SamsungBrowser|Brave/.test(ua));
+    // تشخیص فایرفاکس و نسخه اصلی آن
+    const ffMatch = ua.match(/Firefox\/(\d+)/i);
+    const ffVersion = ffMatch ? parseInt(ffMatch[1], 10) : null;
+    const isFirefox42 = ffVersion === 42;
+    // نمایش بنر اگر مرورگر کروم نباشد یا اگر دقیقاً Firefox 42 باشد
+    return !isChrome || isFirefox42;
+  }
+  const chromeWarning = document.getElementById('chromeWarning');
+  const cwDismissBtn = document.getElementById('cwDismissBtn');
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeClose = document.getElementById('welcomeClose');
+  const dontShowAgain = document.getElementById('dontShowAgain');
+  const welcomeMessage = document.getElementById('welcomeMessage');
+  const welcomeTitle = document.getElementById('welcomeTitle');
+  try{
+    if(shouldShowChromeWarning()){
+      chromeWarning.style.display = 'flex';
+    }
+  }catch(e){ /* ignore */ }
+  if(cwDismissBtn){
+    cwDismissBtn.addEventListener('click', function(){ chromeWarning.style.display = 'none'; });
+  }
+  const storageKey = 'phonebook_welcomed_v1';
+  const already = localStorage.getItem(storageKey);
+  if(!already){
+    // عنوان و پیام خوش‌آمدگویی در HTML از قبل تنظیم شده‌اند؛ فقط نمایش می‌دهیم
+    welcomeOverlay.style.display = 'flex';
+    if(welcomeClose) welcomeClose.focus();
+  }
+  if(welcomeClose){
+    welcomeClose.addEventListener('click', function(){
+      if(dontShowAgain.checked){
+        localStorage.setItem(storageKey, '1');
+      }
+      welcomeOverlay.style.display = 'none';
+    });
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(welcomeOverlay.style.display === 'flex'){
+        welcomeOverlay.style.display = 'none';
+        if(dontShowAgain.checked) localStorage.setItem(storageKey, '1');
+      } else if(chromeWarning.style.display === 'flex'){
+        chromeWarning.style.display = 'none';
+      }
+    }
+  });
+})();
+/* ---------- init view ---------- */
+(function init(){
+  goHome();
+})();
+/* ---------- helper focus update (small helper used در goHome) ---------- */
+function updateFocusForHome(){
+  // سعی کن فوکس را روی اولین آیتم بگذاری برای دسترسی صفحه‌کلید
+  const first = document.querySelector('#sectionsList li[data-section]');
+  if(first) first.focus();
+}
+</script>
+</body>
+</html>
